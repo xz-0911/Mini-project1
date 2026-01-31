@@ -1,46 +1,19 @@
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ success: false, error: "Method not allowed" });
+  if (req.method !== 'POST') {
+    return res.status(405).json({ success: false, error: 'Method not allowed' });
   }
 
-  try {
-    const { topic, tone, length } = req.body;
+  const { topic, tone, length } = req.body;
 
-    if (!topic || !tone || !length) {
-      return res.status(400).json({
-        success: false,
-        error: "Missing parameters"
-      });
-    }
+  // ⬇️ 先用假数据兜底（非常重要，用来验证前后端通不通）
+  const generatedText = `这是一个关于「${topic}」的示例文案。
+语气：${tone}
+长度：${length}
 
-    const prompt = `Write a ${length} ${tone} social media copy about: ${topic}`;
+这是一个测试生成结果，用来确认 API 正常工作。`;
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: "You are a helpful marketing copywriter." },
-          { role: "user", content: prompt }
-        ]
-      })
-    });
-
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
-
-    return res.status(200).json({
-      success: true,
-      content
-    });
-  } catch (err) {
-    return res.status(500).json({
-      success: false,
-      error: err.message
-    });
-  }
+  return res.status(200).json({
+    success: true,
+    content: generatedText
+  });
 }
