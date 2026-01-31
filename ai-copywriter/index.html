@@ -348,13 +348,9 @@
 
                 const data = await response.json();
 
-                if (!data.success) {
-                    throw new Error(data.error || 'API request failed');
-                }
-
                 // Show result
                 loading.classList.remove('active');
-                output.value = data.content;
+                output.value = data.content || data.text || data.result || JSON.stringify(data, null, 2);
                 output.classList.add('active');
                 copyBtn.classList.add('active');
 
