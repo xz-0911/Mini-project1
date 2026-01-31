@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Copywriting Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #F9EECA 0%, #FCE68B 50%, #E2F7C1 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(166, 221, 95, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(90deg, #A6DD5F, #E2F7C1);
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 32px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .main-content {
+            display: flex;
+            min-height: 600px;
+        }
+
+        .left-panel {
+            flex: 1;
+            padding: 40px;
+            background: linear-gradient(180deg, #F9EECA 0%, #FCE68B 100%);
+            border-right: 3px solid #A6DD5F;
+        }
+
+        .right-panel {
+            flex: 1;
+            padding: 40px;
+            background: white;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #5a7c2e;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        input[type="text"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #E2F7C1;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        input[type="text"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #A6DD5F;
+            box-shadow: 0 0 0 3px rgba(166, 221, 95, 0.1);
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(90deg, #A6DD5F, #E2F7C1);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(166, 221, 95, 0.3);
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(166, 221, 95, 0.4);
+        }
+
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .output-container {
+            position: relative;
+        }
+
+        .output-label {
+            margin-bottom: 15px;
+            color: #5a7c2e;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .output-box {
+            width: 100%;
+            min-height: 400px;
+            padding: 20px;
+            border: 2px solid #E2F7C1;
+            border-radius: 10px;
+            font-size: 15px;
+            line-height: 1.8;
+            background: #fafafa;
+            resize: vertical;
+            display: none;
+        }
+
+        .output-box.active {
+            display: block;
+        }
+
+        .copy-btn {
+            margin-top: 15px;
+            padding: 10px 25px;
+            background: #A6DD5F;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: none;
+        }
+
+        .copy-btn.active {
+            display: inline-block;
+        }
+
+        .copy-btn:hover {
+            background: #95cc4f;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: #A6DD5F;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #E2F7C1;
+            border-top: 4px solid #A6DD5F;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            display: none;
+            padding: 20px;
+            background: #ffe6e6;
+            border: 2px solid #ffcccc;
+            border-radius: 10px;
+            color: #cc0000;
+            margin-bottom: 20px;
+        }
+
+        .error.active {
+            display: block;
+        }
+
+        @media (max-width: 968px) {
+            .main-content {
+                flex-direction: column;
+            }
+
+            .left-panel {
+                border-right: none;
+                border-bottom: 3px solid #A6DD5F;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✨ AI Copywriting Generator ✨</h1>
+        </div>
+
+        <div class="main-content">
+            <div class="left-panel">
+                <div id="copywritingForm">
+                    <div class="form-group">
+                        <label for="topic">Topic</label>
+                        <input type="text" id="topic" placeholder="e.g., Spring product launch, Mother's Day sale..." required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tone">Tone</label>
+                        <select id="tone" required>
+                            <option value="">Select a tone</option>
+                            <option value="professional">Professional</option>
+                            <option value="friendly">Friendly</option>
+                            <option value="exciting">Exciting</option>
+                            <option value="humorous">Humorous</option>
+                            <option value="elegant">Elegant</option>
+                            <option value="casual">Casual</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="length">Length</label>
+                        <select id="length" required>
+                            <option value="">Select length</option>
+                            <option value="short">Short (50-100 words)</option>
+                            <option value="medium">Medium (100-200 words)</option>
+                            <option value="long">Long (200-300 words)</option>
+                        </select>
+                    </div>
+
+                    <button class="generate-btn" id="generateBtn">
+                        🚀 Generate Copy
+                    </button>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="output-container">
+                    <div class="output-label">Generated Copy</div>
+                    
+                    <div class="error" id="errorMsg">
+                        ❌ Generation failed. Please try again.
+                    </div>
+
+                    <div class="loading" id="loading">
+                        <div class="spinner"></div>
+                        <p>AI is creating your copy...</p>
+                    </div>
+
+                    <textarea class="output-box" id="output" readonly placeholder="Your generated copy will appear here..."></textarea>
+                    
+                    <button class="copy-btn" id="copyBtn">
+                        📋 Copy Text
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const generateBtn = document.getElementById('generateBtn');
+        const output = document.getElementById('output');
+        const loading = document.getElementById('loading');
+        const errorMsg = document.getElementById('errorMsg');
+        const copyBtn = document.getElementById('copyBtn');
+
+        const toneMap = {
+            'professional': 'professional and formal',
+            'friendly': 'friendly and approachable',
+            'exciting': 'exciting and enthusiastic',
+            'humorous': 'humorous and witty',
+            'elegant': 'elegant and sophisticated',
+            'casual': 'casual and relaxed'
+        };
+
+        const lengthMap = {
+            'short': 'short copy (50-100 words)',
+            'medium': 'medium-length copy (100-200 words)',
+            'long': 'long copy (200-300 words)'
+        };
+
+        generateBtn.addEventListener('click', async () => {
+            const topic = document.getElementById('topic').value.trim();
+            const tone = document.getElementById('tone').value;
+            const length = document.getElementById('length').value;
+
+            if (!topic) {
+                alert('Please enter a topic');
+                return;
+            }
+            if (!tone) {
+                alert('Please select a tone');
+                return;
+            }
+            if (!length) {
+                alert('Please select a length');
+                return;
+            }
+
+            // Reset state
+            output.classList.remove('active');
+            copyBtn.classList.remove('active');
+            errorMsg.classList.remove('active');
+            loading.classList.add('active');
+            generateBtn.disabled = true;
+
+            try {
+                // Call backend API
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        topic: topic,
+                        tone: tone,
+                        length: length
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || 'API request failed');
+                }
+
+                // Show result
+                loading.classList.remove('active');
+                output.value = data.content;
+                output.classList.add('active');
+                copyBtn.classList.add('active');
+
+            } catch (error) {
+                console.error('Generation error:', error);
+                loading.classList.remove('active');
+                errorMsg.classList.add('active');
+                errorMsg.textContent = `❌ Generation failed: ${error.message}`;
+            } finally {
+                generateBtn.disabled = false;
+            }
+        });
+
+        copyBtn.addEventListener('click', () => {
+            if (output.value) {
+                output.select();
+                document.execCommand('copy');
+                
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = '✅ Copied!';
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                }, 2000);
+            }
+        });
+    </script>
+</body>
+</html>
